@@ -31,6 +31,7 @@ var texturesLoaded = 0;
 
 // Helper variables for rotation
 var carAngle = 180;
+var mapAngle = 180;
 
 // Helper variable for animation
 var lastTime = 0;
@@ -359,11 +360,119 @@ function loadCar() {
 //
 // Draw the scene.
 //
-function drawScene() {
+function drawMap() {
   // set the rendering environment to full canvas size
   gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
   // Clear the canvas before we start drawing on it.
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+//  if (carVertexPositionBuffer == null || carVertexNormalBuffer == null || carVertexTextureCoordBuffer == null || carVertexIndexBuffer == null) {
+//    return;
+//  }
+  debugger;
+  if (mapVertexPositionBuffer == null || mapVertexNormalBuffer == null || mapVertexTextureCoordBuffer == null || mapVertexIndexBuffer == null) {
+    return;
+  }
+  
+  // Establish the perspective with which we want to view the
+  // scene. Our field of view is 45 degrees, with a width/height
+  // ratio of 640:480, and we only want to see objects between 0.1 units
+  // and 100 units away from the camera.
+  mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+
+  var specularHighlights = document.getElementById("specular").checked;
+  gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, specularHighlights);
+
+  // Ligthing
+  var lighting = document.getElementById("lighting").checked;
+
+  // set uniform to the value of the checkbox.
+  gl.uniform1i(shaderProgram.useLightingUniform, lighting);
+
+  // set uniforms for lights as defined in the document
+  if (lighting) {
+    gl.uniform3f(
+      shaderProgram.ambientColorUniform,
+      parseFloat(document.getElementById("ambientR").value),
+      parseFloat(document.getElementById("ambientG").value),
+      parseFloat(document.getElementById("ambientB").value)
+    );
+
+    gl.uniform3f(
+      shaderProgram.pointLightingLocationUniform,
+      parseFloat(document.getElementById("lightPositionX").value),
+      parseFloat(document.getElementById("lightPositionY").value),
+      parseFloat(document.getElementById("lightPositionZ").value)
+    );
+
+    gl.uniform3f(
+      shaderProgram.pointLightingSpecularColorUniform,
+      parseFloat(document.getElementById("specularR").value),
+      parseFloat(document.getElementById("specularG").value),
+      parseFloat(document.getElementById("specularB").value)
+    );
+
+    gl.uniform3f(
+      shaderProgram.pointLightingDiffuseColorUniform,
+      parseFloat(document.getElementById("diffuseR").value),
+      parseFloat(document.getElementById("diffuseG").value),
+      parseFloat(document.getElementById("diffuseB").value)
+    );
+  }
+
+
+  // set uniform to the value of the checkbox.
+  gl.uniform1i(shaderProgram.useTexturesUniform, texture != "none");
+
+  // Set the drawing position to the "identity" point, which is
+  // the center of the scene.
+  mat4.identity(mvMatrix);
+
+  // Now move the drawing position a bit to where we want to start
+  // drawing the world.
+  mat4.translate(mvMatrix, [0, 0, -10]);
+  //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
+  mat4.rotate(mvMatrix, degToRad(mapAngle), [0, 1.2, 1.2]);
+  //mat4.rotate(mvMatrix, degToRad(carAngle), [0, 0, 0]);
+
+  gl.bindTexture(gl.TEXTURE_2D, tourDeQuin);
+
+  gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+  // Activate shininess
+  gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
+
+  // Set the vertex positions attribute for the teapot vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mapVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the texture coordinates attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexTextureCoordBuffer);
+  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the normals attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexNormalBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mapVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the index for the vertices.
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
+  setMatrixUniforms();
+
+  // Draw the map
+  gl.drawElements(gl.TRIANGLES, mapVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+//
+// drawScene
+//
+// Draw the scene.
+//
+function drawScene() {
+  drawMap();
+  // set the rendering environment to full canvas size
+  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+  // Clear the canvas before we start drawing on it.
+  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   if (carVertexPositionBuffer == null || carVertexNormalBuffer == null || carVertexTextureCoordBuffer == null || carVertexIndexBuffer == null) {
     return;
@@ -499,7 +608,7 @@ function start() {
     
     // Next, load and set up the textures we'll be using.
     initTextures();
-    // loadMap();
+    loadMap();
     loadCar();
     
     
