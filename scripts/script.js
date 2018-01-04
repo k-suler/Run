@@ -369,9 +369,9 @@ function drawScene() {
     return;
   }
 
-  if (mapVertexPositionBuffer == null || mapVertexNormalBuffer == null || mapVertexTextureCoordBuffer == null || mapVertexIndexBuffer == null) {
-    return;
-  }
+//  if (mapVertexPositionBuffer == null || mapVertexNormalBuffer == null || mapVertexTextureCoordBuffer == null || mapVertexIndexBuffer == null) {
+//    return;
+//  }
   
   // Establish the perspective with which we want to view the
   // scene. Our field of view is 45 degrees, with a width/height
@@ -419,8 +419,6 @@ function drawScene() {
     );
   }
 
-  // Textures
-  var texture = document.getElementById("texture").value;
 
   // set uniform to the value of the checkbox.
   gl.uniform1i(shaderProgram.useTexturesUniform, texture != "none");
@@ -436,13 +434,8 @@ function drawScene() {
   mat4.rotate(mvMatrix, degToRad(carAngle), [0, 1.2, 1.2]);
   //mat4.rotate(mvMatrix, degToRad(carAngle), [0, 0, 0]);
 
-  // Activate textures
-  gl.activeTexture(gl.TEXTURE0);
-  if (texture == "earth") {
-    gl.bindTexture(gl.TEXTURE_2D, strelaMcQuin);
-  } else if (texture == "galvanized") {
-    gl.bindTexture(gl.TEXTURE_2D, metalTexture);
-  }
+  gl.bindTexture(gl.TEXTURE_2D, strelaMcQuin);
+
   gl.uniform1i(shaderProgram.samplerUniform, 0);
 
   // Activate shininess
@@ -506,15 +499,16 @@ function start() {
     
     // Next, load and set up the textures we'll be using.
     initTextures();
-    //debugger;
-   // loadMap();
+    // loadMap();
     loadCar();
+    
     
     // Set up to draw the scene periodically.
     setInterval(function() {
       if (texturesLoaded == numberOfTextures) { // only draw scene and animate when textures are loaded.
         requestAnimationFrame(animate);
         drawScene();
+        debugger;
       }
     }, 15);
   }
