@@ -3,11 +3,17 @@ var canvas;
 var gl;
 var shaderProgram;
 
+
 // Buffers
-var teapotVertexPositionBuffer;
-var teapotVertexNormalBuffer;
-var teapotVertexTextureCoordBuffer;
-var teapotVertexIndexBuffer;
+var carVertexPositionBuffer;
+var carVertexNormalBuffer;
+var carVertexTextureCoordBuffer;
+var carVertexIndexBuffer;
+
+var mapVertexPositionBuffer;
+var mapVertexNormalBuffer;
+var mapVertexTextureCoordBuffer;
+var mapVertexIndexBuffer;
 
 // Model-view and projection matrix and model-view matrix stack
 var mvMatrixStack = [];
@@ -15,7 +21,8 @@ var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 
 // Variable for storing textures
-var earthTexture;
+var strelaMcQuin;
+var tourDeQuin;
 var metalTexture;
 
 // Variable that stores  loading state of textures.
@@ -23,7 +30,7 @@ var numberOfTextures = 2;
 var texturesLoaded = 0;
 
 // Helper variables for rotation
-var teapotAngle = 180;
+var carAngle = 180;
 
 // Helper variable for animation
 var lastTime = 0;
@@ -215,19 +222,28 @@ function setMatrixUniforms() {
 // the job; it gets called each time a texture finishes loading.
 //
 function initTextures() {
-  earthTexture = gl.createTexture();
-  earthTexture.image = new Image();
-  earthTexture.image.onload = function () {
-    handleTextureLoaded(earthTexture)
+  strelaMcQuin = gl.createTexture();
+  strelaMcQuin.image = new Image();
+  strelaMcQuin.image.onload = function () {
+    handleTextureLoaded(strelaMcQuin)
   }
-  earthTexture.image.src = "./assets/car1.png";
+  strelaMcQuin.image.src = "./assets/car1.png";
 
+  tourDeQuin = gl.createTexture();
+  tourDeQuin.image = new Image();
+  tourDeQuin.image.onload = function () {
+    handleTextureLoaded(tourDeQuin)
+  }
+  tourDeQuin.image.src = "./assets/dev.png";
+
+/*
   metalTexture = gl.createTexture();
   metalTexture.image = new Image();
   metalTexture.image.onload = function () {
     handleTextureLoaded(metalTexture)
   }
   metalTexture.image.src = "./assets/metal.jpg";
+*/
 }
 
 function handleTextureLoaded(texture) {
@@ -251,49 +267,88 @@ function handleTextureLoaded(texture) {
 //
 // Handle loaded teapot
 //
-function handleLoadedTeapot(car) {
+function handleLoadedCar(car) {
   // Pass the normals into WebGL
-  teapotVertexNormalBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
+  carVertexNormalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexNormalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.normals), gl.STATIC_DRAW);
-  teapotVertexNormalBuffer.itemSize = 3;
-  teapotVertexNormalBuffer.numItems = car.normals.length / 3;
+  carVertexNormalBuffer.itemSize = 3;
+  carVertexNormalBuffer.numItems = car.normals.length / 3;
 
   // Pass the texture coordinates into WebGL
-  teapotVertexTextureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
+  carVertexTextureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexTextureCoordBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.uvs), gl.STATIC_DRAW);
-  teapotVertexTextureCoordBuffer.itemSize = 2;
-  teapotVertexTextureCoordBuffer.numItems = car.uvs.length / 2;
+  carVertexTextureCoordBuffer.itemSize = 2;
+  carVertexTextureCoordBuffer.numItems = car.uvs.length / 2;
 
   // Pass the vertex positions into WebGL
-  teapotVertexPositionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
+  carVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.vertices), gl.STATIC_DRAW);
-  teapotVertexPositionBuffer.itemSize = 3;
-  teapotVertexPositionBuffer.numItems = car.vertices.length / 3;
+  carVertexPositionBuffer.itemSize = 3;
+  carVertexPositionBuffer.numItems = car.vertices.length / 3;
 
   // Pass the indices into WebGL
-  teapotVertexIndexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
+  carVertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, carVertexIndexBuffer);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(car.faces), gl.STATIC_DRAW);
-  teapotVertexIndexBuffer.itemSize = 1;
-  teapotVertexIndexBuffer.numItems = car.faces.length;
+  carVertexIndexBuffer.itemSize = 1;
+  carVertexIndexBuffer.numItems = car.faces.length;
 
   document.getElementById("loadingtext").textContent = "";
 }
 
-//
-// loadTeapot
-//
-// Load teapot
-//
+function handleLoadedMap(map) {
+  // Pass the normals into WebGL
+  mapVertexNormalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexNormalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(map.normals), gl.STATIC_DRAW);
+  mapVertexNormalBuffer.itemSize = 3;
+  mapVertexNormalBuffer.numItems = map.normals.length / 3;
+
+  // Pass the texture coordinates into WebGL
+  mapVertexTextureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexTextureCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(map.uvs), gl.STATIC_DRAW);
+  mapVertexTextureCoordBuffer.itemSize = 2;
+  mapVertexTextureCoordBuffer.numItems = map.uvs.length / 2;
+
+  // Pass the vertex positions into WebGL
+  mapVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexPositionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(map.vertices), gl.STATIC_DRAW);
+  mapVertexPositionBuffer.itemSize = 3;
+  mapVertexPositionBuffer.numItems = map.vertices.length / 3;
+
+  // Pass the indices into WebGL
+  mapVertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(map.faces), gl.STATIC_DRAW);
+  mapVertexIndexBuffer.itemSize = 1;
+  mapVertexIndexBuffer.numItems = map.faces.length;
+
+  document.getElementById("loadingtext").textContent = "";
+}
+
+//WIP
 function loadMap() {
+  var request = new XMLHttpRequest();
+  request.open("GET", "./assets/dev.json");
+  request.onreadystatechange = function () {
+    if (request.readyState == 4) {
+      handleLoadedMap(JSON.parse(request.responseText));
+    }
+  }
+  request.send();
+}
+
+function loadCar() {
   var request = new XMLHttpRequest();
   request.open("GET", "./assets/car.json");
   request.onreadystatechange = function () {
     if (request.readyState == 4) {
-      handleLoadedTeapot(JSON.parse(request.responseText));
+      handleLoadedCar(JSON.parse(request.responseText));
     }
   }
   request.send();
@@ -310,7 +365,11 @@ function drawScene() {
   // Clear the canvas before we start drawing on it.
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  if (teapotVertexPositionBuffer == null || teapotVertexNormalBuffer == null || teapotVertexTextureCoordBuffer == null || teapotVertexIndexBuffer == null) {
+  if (carVertexPositionBuffer == null || carVertexNormalBuffer == null || carVertexTextureCoordBuffer == null || carVertexIndexBuffer == null) {
+    return;
+  }
+
+  if (mapVertexPositionBuffer == null || mapVertexNormalBuffer == null || mapVertexTextureCoordBuffer == null || mapVertexIndexBuffer == null) {
     return;
   }
   
@@ -372,14 +431,15 @@ function drawScene() {
 
   // Now move the drawing position a bit to where we want to start
   // drawing the world.
-  mat4.translate(mvMatrix, [0, 0, -40]);
-  mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
-  mat4.rotate(mvMatrix, degToRad(teapotAngle), [0, 1, 0]);
+  mat4.translate(mvMatrix, [0, 0, -10]);
+  //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
+  mat4.rotate(mvMatrix, degToRad(carAngle), [0, 1.2, 1.2]);
+  //mat4.rotate(mvMatrix, degToRad(carAngle), [0, 0, 0]);
 
   // Activate textures
   gl.activeTexture(gl.TEXTURE0);
   if (texture == "earth") {
-    gl.bindTexture(gl.TEXTURE_2D, earthTexture);
+    gl.bindTexture(gl.TEXTURE_2D, strelaMcQuin);
   } else if (texture == "galvanized") {
     gl.bindTexture(gl.TEXTURE_2D, metalTexture);
   }
@@ -389,23 +449,23 @@ function drawScene() {
   gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
 
   // Set the vertex positions attribute for the teapot vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, carVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the texture coordinates attribute for the vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
-  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, teapotVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexTextureCoordBuffer);
+  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, carVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the normals attribute for the vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexNormalBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, carVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the index for the vertices.
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, carVertexIndexBuffer);
   setMatrixUniforms();
 
   // Draw the teapot
-  gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, carVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 //
@@ -418,8 +478,8 @@ function animate() {
   if (lastTime != 0) {
     var elapsed = timeNow - lastTime;
 
-    // rotate the teapot for a small amount
-    teapotAngle += 0.05 * elapsed;
+    // rotate the car for a small amount
+    //carAngle += 0.01 * elapsed;
   }
   lastTime = timeNow;
 }
@@ -446,7 +506,9 @@ function start() {
     
     // Next, load and set up the textures we'll be using.
     initTextures();
-    loadMap();
+    //debugger;
+   // loadMap();
+    loadCar();
     
     // Set up to draw the scene periodically.
     setInterval(function() {
