@@ -477,7 +477,7 @@ function drawScene() {
   mat4.rotate(mvMatrix, degToRad(mapAngle), [0, 1.2, 1.2]);
   //mat4.rotate(mvMatrix, degToRad(carAngle), [0, 0, 0]);
 
-  gl.bindTexture(gl.TEXTURE_2D, strelaMcQuin);
+  gl.bindTexture(gl.TEXTURE_2D, tourDeQuin);
 
   gl.uniform1i(shaderProgram.samplerUniform, 0);
 
