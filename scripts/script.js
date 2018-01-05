@@ -3,6 +3,25 @@ var canvas;
 var gl;
 var shaderProgram;
 
+var minutesLabel;
+var secondsLabel;
+var totalSeconds;
+var intervalID;
+
+function setTime() {
+  ++totalSeconds;
+  secondsLabel.innerHTML = pad(totalSeconds % 60);
+  minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
+}
+
+function pad(val) {
+  var valString = val + "";
+  if (valString.length < 2) {
+    return "0" + valString;
+  } else {
+    return valString;
+  }
+}
 
 // Buffers
 var policeVertexPositionBuffer;
@@ -739,6 +758,9 @@ function animate() {
 //
 function start() {
   canvas = document.getElementById("glcanvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  document.getElementsByClassName("end")[0].style.display = "none";
 
   gl = initGL(canvas);      // Initialize the GL context
   if (gl) {
@@ -762,6 +784,14 @@ function start() {
     document.onkeydown = handleKeyDown;
 	document.onkeyup = handleKeyUp;
    
+    minutesLabel = document.getElementById("minutes");
+    secondsLabel = document.getElementById("seconds");
+    totalSeconds = 0;
+    intervalID = setInterval(setTime, 1000);
+
+
+
+
     // Set up to draw the scene periodically.
     setInterval(function() {
       if (texturesLoaded == numberOfTextures) { // only draw scene and animate when textures are loaded.
@@ -781,14 +811,18 @@ function checkCheckPoint(){
     checkStage++;
   }
 
-  if (checkStage == checkPointPos.x[checkStage]){
-    //END GAME
+  if (checkStage == 8){
+    clearInterval(intervalID);
+    document.getElementsByClassName("end-text")[0].innerHTML = "You won!<br><br>Press P to play again<br><br>Your time was " + minutesLabel.innerHTML + ":" + secondsLabel.innerHTML;
+    document.getElementsByClassName("end")[0].style.display = "block";
   }
 
 }
 
 function handleKeys() {
-
+  if (currentlyPressedKeys[80]) { 
+    location.reload(); 
+  }
 
     //DK Donky Kong
     if (currentlyPressedKeys[32]) { 

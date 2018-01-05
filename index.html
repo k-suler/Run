@@ -112,9 +112,15 @@
 	</head>
 	<body onload="start()">
 		<div id="content">
-			<canvas id="glcanvas" width="1280px" height="720px">
+			<div class="time">
+				<span id="minutes">00</span>:<span id="seconds">00</span>
+			</div>
+			<canvas id="glcanvas">
 				No <code>&lt;canvas&gt;</code> suppport in your browser.
 			</canvas>
+			<div class="end">
+				<p class="end-text"></p>
+			</div>
 			<div id="loadingtext">Loading world...</div>
 			<div id="gauge" style="width:200px; height:150px"></div>
 			

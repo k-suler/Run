@@ -1,3 +1,12 @@
+html, body {
+	overflow: hidden;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+}
+
 #content {
 	width: 100%;
 	text-align: center;
@@ -48,9 +57,27 @@ td {
 	font-weight: bold;
 }
 
-#PreviewGaugeMeter_2 {
-	position: absolute !important;
-	left: 17vw;
-	top:10px;
-	border: none;
+.end {
+	background: #000;
+	color: #fff;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9999;
+}
+
+.end-text {
+	font-size: 36px;
+	font-weight: bold;
+	padding-top: 150px;
+}
+
+.time {
+	position: absolute;
+	top: 20px;
+	left: 48.5%;
+	color: #fff;
+	font-size: 36px;
 }
