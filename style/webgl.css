@@ -15,7 +15,7 @@ body {
 canvas {
 	display: inline;
 	border: 1px solid black;
-	background: skyblue;
+	background: rgb(16, 16, 82);
 }
 
 h1 {

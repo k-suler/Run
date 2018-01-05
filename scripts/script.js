@@ -855,10 +855,14 @@ function handleKeys() {
           // NITRIČ
           if(-carSpeed*50 <= 146 && nitro.config.value > 0) {
             carSpeed -= 0.05;
-            nitro.refresh(nitro.config.value--);
+            nitro.refresh(nitro.config.value-1);
             policeSpeed += 0.01;
             g.refresh((-carSpeed*50).toFixed(0));
           }
+      }
+      
+      if(nitro.config.value < 100) {
+        nitro.refresh(nitro.config.value+=0.05);
       }
     }
     if (currentlyPressedKeys[40]) {
