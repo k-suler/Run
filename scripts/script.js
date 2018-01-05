@@ -478,7 +478,7 @@ function drawScene() {
 
   mat4.rotate(mvMatrix, -6, [1, 0, 0]);
   mat4.rotate(mvMatrix, -degToRad(carRotation), [0, 1, 0]);
-  mat4.translate(mvMatrix, [-(carPositionX * Math.sin(degToRad(carRotation)/2)), -5 , -(carPositionZ * Math.sin(degToRad(carRotation)/2))]);
+  mat4.translate(mvMatrix,[-carPositionX, 0, -carPositionZ]);
 
   // draw Car
 
