@@ -457,7 +457,7 @@ function drawScene() {
       shaderProgram.ambientColorUniform,0.2, 0.2, 0.2);
 
     gl.uniform3f(
-      shaderProgram.pointLightingLocationUniform, 0, 4, -20);
+      shaderProgram.pointLightingLocationUniform, 0, -20, -20);
 
     gl.uniform3f(
       shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
@@ -474,9 +474,11 @@ function drawScene() {
   mat4.identity(mvMatrix);
 
   // setup camera position
+  mat4.translate(mvMatrix, [0,0,-10]);  
 
-  mat4.rotate(mvMatrix, degToRad(carRotation), [0, -1, 0]);
-  mat4.translate(mvMatrix, [-carPositionX, -5, -carPositionZ-20]);
+  mat4.rotate(mvMatrix, -6, [1, 0, 0]);
+  mat4.rotate(mvMatrix, -degToRad(carRotation), [0, 1, 0]);
+  mat4.translate(mvMatrix, [-(carPositionX * Math.sin(degToRad(carRotation)/2)), -5 , -(carPositionZ * Math.sin(degToRad(carRotation)/2))]);
 
   // draw Car
 
@@ -566,7 +568,7 @@ function drawScene() {
   mat4.translate(mvMatrix, [0, -0.02, 0]);
   //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
   mat4.rotate(mvMatrix, degToRad(mapAngle), [0, 1.2, 1.2]);
-  //mat4.rotate(mvMatrix, degToRad(carAngle), [0, 0, 0]);
+  mat4.rotate(mvMatrix, degToRad(carAngle), [-1, 0, 0]);
 
   gl.bindTexture(gl.TEXTURE_2D, tourDeQuin);
 
@@ -684,8 +686,4 @@ function handleKeyDown(event) {
 function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
     carSpeed=0;
-}
-
-function calculateCameraPos(x, y, angle){
-
 }
