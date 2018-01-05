@@ -5,10 +5,15 @@ var shaderProgram;
 
 
 // Buffers
-var carVertexPositionBuffer;
-var carVertexNormalBuffer;
-var carVertexTextureCoordBuffer;
-var carVertexIndexBuffer;
+var policeVertexPositionBuffer;
+var policeVertexNormalBuffer;
+var policeVertexTextureCoordBuffer;
+var policeVertexIndexBuffer;
+
+var policeVertexPositionBuffer;
+var policeVertexNormalBuffer;
+var policeVertexTextureCoordBuffer;
+var policeVertexIndexBuffer;
 
 var mapVertexPositionBuffer;
 var mapVertexNormalBuffer;
@@ -25,17 +30,23 @@ var strelaMcQuin;
 var tourDeQuin;
 
 // Variable that stores  loading state of textures.
-var numberOfTextures = 2;
+var numberOfTextures = 3;
 var texturesLoaded = 0;
 
 // Helper variables for rotation
 var carAngle = 180;
+var policeAngle = 180;
 var mapAngle = 180;
 
 var carRotation = 0;
 var carSpeed = 0;
 var carPositionX = 0;
 var carPositionZ = 0;
+
+var policeRotation = 0;
+var policeSpeed = 0;
+var policePositionX = 20;
+var policePositionZ = 20;
 
 var currentlyPressedKeys = {};
 
@@ -236,6 +247,13 @@ function initTextures() {
   }
   strelaMcQuin.image.src = "./assets/car1.png";
 
+  policeMcQuin = gl.createTexture();
+  policeMcQuin.image = new Image();
+  policeMcQuin.image.onload = function () {
+    handleTextureLoaded(policeMcQuin)
+  }
+  policeMcQuin.image.src = "./assets/car2.png";
+
   tourDeQuin = gl.createTexture();
   tourDeQuin.image = new Image();
   tourDeQuin.image.onload = function () {
@@ -268,32 +286,66 @@ function handleTextureLoaded(texture) {
 //
 function handleLoadedCar(car) {
   // Pass the normals into WebGL
-  carVertexNormalBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexNormalBuffer);
+  policeVertexNormalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexNormalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.normals), gl.STATIC_DRAW);
-  carVertexNormalBuffer.itemSize = 3;
-  carVertexNormalBuffer.numItems = car.normals.length / 3;
+  policeVertexNormalBuffer.itemSize = 3;
+  policeVertexNormalBuffer.numItems = car.normals.length / 3;
 
   // Pass the texture coordinates into WebGL
-  carVertexTextureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexTextureCoordBuffer);
+  policeVertexTextureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexTextureCoordBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.uvs), gl.STATIC_DRAW);
-  carVertexTextureCoordBuffer.itemSize = 2;
-  carVertexTextureCoordBuffer.numItems = car.uvs.length / 2;
+  policeVertexTextureCoordBuffer.itemSize = 2;
+  policeVertexTextureCoordBuffer.numItems = car.uvs.length / 2;
 
   // Pass the vertex positions into WebGL
-  carVertexPositionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexPositionBuffer);
+  policeVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.vertices), gl.STATIC_DRAW);
-  carVertexPositionBuffer.itemSize = 3;
-  carVertexPositionBuffer.numItems = car.vertices.length / 3;
+  policeVertexPositionBuffer.itemSize = 3;
+  policeVertexPositionBuffer.numItems = car.vertices.length / 3;
 
   // Pass the indices into WebGL
-  carVertexIndexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, carVertexIndexBuffer);
+  policeVertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, policeVertexIndexBuffer);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(car.faces), gl.STATIC_DRAW);
-  carVertexIndexBuffer.itemSize = 1;
-  carVertexIndexBuffer.numItems = car.faces.length;
+  policeVertexIndexBuffer.itemSize = 1;
+  policeVertexIndexBuffer.numItems = car.faces.length;
+
+  document.getElementById("loadingtext").textContent = "";
+}
+
+//
+//
+function handleLoadedPCar(car) {
+  // Pass the normals into WebGL
+  policeVertexNormalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexNormalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.normals), gl.STATIC_DRAW);
+  policeVertexNormalBuffer.itemSize = 3;
+  policeVertexNormalBuffer.numItems = car.normals.length / 3;
+
+  // Pass the texture coordinates into WebGL
+  policeVertexTextureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexTextureCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.uvs), gl.STATIC_DRAW);
+  policeVertexTextureCoordBuffer.itemSize = 2;
+  policeVertexTextureCoordBuffer.numItems = car.uvs.length / 2;
+
+  // Pass the vertex positions into WebGL
+  policeVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(car.vertices), gl.STATIC_DRAW);
+  policeVertexPositionBuffer.itemSize = 3;
+  policeVertexPositionBuffer.numItems = car.vertices.length / 3;
+
+  // Pass the indices into WebGL
+  policeVertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, policeVertexIndexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(car.faces), gl.STATIC_DRAW);
+  policeVertexIndexBuffer.itemSize = 1;
+  policeVertexIndexBuffer.numItems = car.faces.length;
 
   document.getElementById("loadingtext").textContent = "";
 }
@@ -353,6 +405,19 @@ function loadCar() {
   request.send();
 }
 
+
+//change blender file
+function loadPCar() {
+  var request = new XMLHttpRequest();
+  request.open("GET", "./assets/carP.json");
+  request.onreadystatechange = function () {
+    if (request.readyState == 4) {
+      handleLoadedPCar(JSON.parse(request.responseText));
+    }
+  }
+  request.send();
+}
+
 //
 // drawScene
 //
@@ -364,7 +429,8 @@ function drawScene() {
   // Clear the canvas before we start drawing on it.
   //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  if (carVertexPositionBuffer == null || carVertexNormalBuffer == null || carVertexTextureCoordBuffer == null || carVertexIndexBuffer == null ||
+  if (policeVertexPositionBuffer == null || policeVertexNormalBuffer == null || policeVertexTextureCoordBuffer == null || policeVertexIndexBuffer == null ||
+  	policeVertexPositionBuffer == null || policeVertexNormalBuffer == null || policeVertexTextureCoordBuffer == null || policeVertexIndexBuffer == null ||
   	mapVertexPositionBuffer == null || mapVertexNormalBuffer == null || mapVertexTextureCoordBuffer == null || mapVertexIndexBuffer == null) {
     return;
   }
@@ -373,13 +439,14 @@ function drawScene() {
   // scene. Our field of view is 45 degrees, with a width/height
   // ratio of 640:480, and we only want to see objects between 0.1 units
   // and 100 units away from the camera.
-  mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+  mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 300.0, pMatrix);
 
   var specularHighlights = document.getElementById("specular").checked;
   gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, specularHighlights);
 
   // Ligthing
-  var lighting = document.getElementById("lighting").checked;
+  //var lighting = document.getElementById("lighting").checked;
+  var lighting = true;
 
   // set uniform to the value of the checkbox.
   gl.uniform1i(shaderProgram.useLightingUniform, lighting);
@@ -387,32 +454,15 @@ function drawScene() {
   // set uniforms for lights as defined in the document
   if (lighting) {
     gl.uniform3f(
-      shaderProgram.ambientColorUniform,
-      parseFloat(document.getElementById("ambientR").value),
-      parseFloat(document.getElementById("ambientG").value),
-      parseFloat(document.getElementById("ambientB").value)
-    );
+      shaderProgram.ambientColorUniform,0.2, 0.2, 0.2);
 
     gl.uniform3f(
-      shaderProgram.pointLightingLocationUniform,
-      parseFloat(document.getElementById("lightPositionX").value),
-      parseFloat(document.getElementById("lightPositionY").value),
-      parseFloat(document.getElementById("lightPositionZ").value)
-    );
+      shaderProgram.pointLightingLocationUniform, 0, 4, -20);
 
     gl.uniform3f(
-      shaderProgram.pointLightingSpecularColorUniform,
-      parseFloat(document.getElementById("specularR").value),
-      parseFloat(document.getElementById("specularG").value),
-      parseFloat(document.getElementById("specularB").value)
-    );
+      shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
 
-    gl.uniform3f(
-      shaderProgram.pointLightingDiffuseColorUniform,
-      parseFloat(document.getElementById("diffuseR").value),
-      parseFloat(document.getElementById("diffuseG").value),
-      parseFloat(document.getElementById("diffuseB").value)
-    );
+    gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
   }
 
 
@@ -425,8 +475,8 @@ function drawScene() {
 
   // setup camera position
 
-  mat4.translate(mvMatrix, [0, -10, -30]);
-  mat4.rotate(mvMatrix, degToRad(30), [1, 0, 0]);
+  mat4.rotate(mvMatrix, degToRad(carRotation), [0, -1, 0]);
+  mat4.translate(mvMatrix, [-carPositionX, -5, -carPositionZ-20]);
 
   // draw Car
 
@@ -443,26 +493,67 @@ function drawScene() {
   gl.uniform1i(shaderProgram.samplerUniform, 0);
 
   // Activate shininess
-  gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
+  gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
   // Set the vertex positions attribute for the teapot vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexPositionBuffer);
-  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, carVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, policeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the texture coordinates attribute for the vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexTextureCoordBuffer);
-  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, carVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexTextureCoordBuffer);
+  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, policeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the normals attribute for the vertices.
-  gl.bindBuffer(gl.ARRAY_BUFFER, carVertexNormalBuffer);
-  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, carVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexNormalBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, policeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
   // Set the index for the vertices.
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, carVertexIndexBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, policeVertexIndexBuffer);
   setMatrixUniforms();
 
   // Draw the car
-  gl.drawElements(gl.TRIANGLES, carVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, policeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+  mvPopMatrix();
+
+
+  //
+  //
+  // police draw Car
+
+  mvPushMatrix();
+
+  // pozicija avta
+  mat4.translate(mvMatrix, [policePositionX, 0, policePositionZ]);
+  //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
+  mat4.rotate(mvMatrix, degToRad(policeAngle), [0, 1.2, 1.2]);
+  mat4.rotate(mvMatrix, degToRad(policeRotation), [0, 0, 1]);
+
+  gl.bindTexture(gl.TEXTURE_2D, policeMcQuin);
+
+  gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+  // Activate shininess
+  gl.uniform1f(shaderProgram.materialShininessUniform, 32);
+
+  // Set the vertex positions attribute for the teapot vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, policeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the texture coordinates attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexTextureCoordBuffer);
+  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, policeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the normals attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexNormalBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, policeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the index for the vertices.
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, policeVertexIndexBuffer);
+  setMatrixUniforms();
+
+  // Draw the car
+  gl.drawElements(gl.TRIANGLES, policeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
   mvPopMatrix();
 
@@ -482,7 +573,7 @@ function drawScene() {
   gl.uniform1i(shaderProgram.samplerUniform, 0);
 
   // Activate shininess
-  gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
+  gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
   // Set the vertex positions attribute for the teapot vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexPositionBuffer);
@@ -549,6 +640,8 @@ function start() {
     initTextures();
     loadMap();
     loadCar();
+    loadPCar();
+    //debugger;
     
     document.onkeydown = handleKeyDown;
 	document.onkeyup = handleKeyUp;
@@ -559,7 +652,6 @@ function start() {
         requestAnimationFrame(animate);
         handleKeys();
         drawScene();
-        debugger;
       }
     }, 15);
   }
@@ -590,5 +682,10 @@ function handleKeyDown(event) {
 }
 
 function handleKeyUp(event) {
-  	currentlyPressedKeys[event.keyCode] = false;
+    currentlyPressedKeys[event.keyCode] = false;
+    carSpeed=0;
+}
+
+function calculateCameraPos(x, y, angle){
+
 }
