@@ -259,7 +259,7 @@ function initTextures() {
   tourDeQuin.image.onload = function () {
     handleTextureLoaded(tourDeQuin)
   }
-  tourDeQuin.image.src = "./assets/dev.png";
+  tourDeQuin.image.src = "./assets/world1.png";
 
 }
 
@@ -385,7 +385,7 @@ function handleLoadedMap(map) {
 //WIP
 function loadMap() {
   var request = new XMLHttpRequest();
-  request.open("GET", "./assets/dev.json");
+  request.open("GET", "./assets/world.json");
   request.onreadystatechange = function () {
     if (request.readyState == 4) {
       handleLoadedMap(JSON.parse(request.responseText));
@@ -439,7 +439,7 @@ function drawScene() {
   // scene. Our field of view is 45 degrees, with a width/height
   // ratio of 640:480, and we only want to see objects between 0.1 units
   // and 100 units away from the camera.
-  mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 300.0, pMatrix);
+  mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1500.0, pMatrix);
 
   var specularHighlights = document.getElementById("specular").checked;
   gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, specularHighlights);
@@ -453,15 +453,9 @@ function drawScene() {
 
   // set uniforms for lights as defined in the document
   if (lighting) {
-    gl.uniform3f(
-      shaderProgram.ambientColorUniform,0.2, 0.2, 0.2);
-
-    gl.uniform3f(
-      shaderProgram.pointLightingLocationUniform, 0, -20, -20);
-
-    gl.uniform3f(
-      shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
-
+    gl.uniform3f(shaderProgram.ambientColorUniform,0.2, 0.2, 0.2);
+    gl.uniform3f(shaderProgram.pointLightingLocationUniform, 0, -50, -20);
+    gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
     gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
   }
 
@@ -564,11 +558,11 @@ function drawScene() {
   mvPushMatrix();
 
   // pozicija mape
-  mat4.scale(mvMatrix, [100, 100, 100])
-  mat4.translate(mvMatrix, [0, -0.02, 0]);
+  mat4.scale(mvMatrix, [50, 50, 50])
+  mat4.translate(mvMatrix, [0, 2, 0]);
   //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
   mat4.rotate(mvMatrix, degToRad(mapAngle), [0, 1.2, 1.2]);
-  mat4.rotate(mvMatrix, degToRad(carAngle), [-1, 0, 0]);
+  mat4.rotate(mvMatrix, degToRad(carAngle), [1, 0, 0]);
 
   gl.bindTexture(gl.TEXTURE_2D, tourDeQuin);
 
@@ -664,13 +658,43 @@ function start() {
 
 function handleKeys() {
 
+
+    //DK Donky Kong
+    if (currentlyPressedKeys[32]) { 
+      if (currentlyPressedKeys[37]) {
+        // LEFT
+        carRotation += 3;
+     }
+      if (currentlyPressedKeys[39]) {
+          // RIGHT
+          carRotation -= 3;
+      }
+      if (carSpeed < 0)
+        carSpeed += 0.05;
+    }
     if (currentlyPressedKeys[38]) {
         // UP
-        if(-carSpeed*50 <= 100) {
+        if(30 < -carSpeed*50 && -carSpeed*50 <= 100) {
           carSpeed += -0.01;
           policeSpeed += -0.01;
           g.refresh((-carSpeed*50).toFixed(0));
         }
+        // UP
+        if(-carSpeed*50 <= 30) {
+          carSpeed += -0.03;
+          policeSpeed += -0.05;
+          g.refresh((-carSpeed*50).toFixed(0));
+        }
+
+        if (currentlyPressedKeys[78]) {
+          // NITRIČ
+          if(-carSpeed*50 <= 146 && nitro.config.value > 0) {
+            carSpeed -= 0.05;
+            nitro.refresh(nitro.config.value--);
+            policeSpeed += 0.01;
+            g.refresh((-carSpeed*50).toFixed(0));
+          }
+      }
     }
     if (currentlyPressedKeys[40]) {
         // DOWN
