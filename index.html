@@ -107,6 +107,8 @@
 				document.getElementById(id+"span").innerHTML = " " + newValue;
 			}
 		</script>
+		
+
 	</head>
 	<body onload="start()">
 		<div id="content">
@@ -114,7 +116,10 @@
 				No <code>&lt;canvas&gt;</code> suppport in your browser.
 			</canvas>
 			<div id="loadingtext">Loading world...</div>
-			<br />
+			<div id="gauge" style="width:200px; height:150px"></div>
+			
+			<div id="nitro" style="width:200px; height:150px"></div>
+						<br />
 		        <input type="checkbox" id="specular" checked /> Show specular highlight<br/>
 			    <input type="checkbox" id="lighting" checked /> Use lighting<br/>
 
@@ -126,6 +131,30 @@
 			    </select>
     <br/>
 		    <br/>
-
+			<script src="./scripts/raphael-2.1.4.min.js"></script>
+			<script src="./scripts/justgage.js"></script>
+			<script>
+      var g = new JustGage({
+        id: "gauge",
+        value: 0,
+        min: 0,
+		max: 100,
+		valueFontColor: "#00ff00",
+		titleFontColor  : "#00ff00",
+		labelFontColor  : "#00ff00",
+        title: "Speed"
+	  });
+	  
+	  var nitro = new JustGage({
+        id: "nitro",
+        value: 100,
+        min: 0,
+		max: 100,
+		valueFontColor: "#ff0000",
+		titleFontColor  : "#ff0000",
+		labelFontColor  : "#ff0000",
+        title: "Nitro"
+      });
+    </script>
 	</body>
 </html>

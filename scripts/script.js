@@ -38,15 +38,15 @@ var carAngle = 180;
 var policeAngle = 180;
 var mapAngle = 180;
 
-var carRotation = 0;
+var carRotation = 90;
 var carSpeed = 0;
 var carPositionX = 0;
 var carPositionZ = 0;
 
-var policeRotation = 0;
+var policeRotation = 90;
 var policeSpeed = 0;
-var policePositionX = 20;
-var policePositionZ = 20;
+var policePositionX = 0;
+var policePositionZ = 7.5;
 
 var currentlyPressedKeys = {};
 
@@ -478,7 +478,7 @@ function drawScene() {
 
   mat4.rotate(mvMatrix, -6, [1, 0, 0]);
   mat4.rotate(mvMatrix, -degToRad(carRotation), [0, 1, 0]);
-  mat4.translate(mvMatrix,[-carPositionX, 0, -carPositionZ]);
+  mat4.translate(mvMatrix,[-carPositionX, -0.5, -carPositionZ]);
 
   // draw Car
 
@@ -612,6 +612,9 @@ function animate() {
     carPositionX += Math.sin(degToRad(carRotation)) * carSpeed;
     carPositionZ += Math.cos(degToRad(carRotation)) * carSpeed;
 
+    policePositionX += Math.sin(degToRad(policeRotation)) * policeSpeed;
+    policePositionZ += Math.cos(degToRad(policeRotation)) * policeSpeed;
+
     // rotate the car for a small amount
     //carAngle += 0.01 * elapsed;
   }
@@ -663,19 +666,29 @@ function handleKeys() {
 
     if (currentlyPressedKeys[38]) {
         // UP
-        carSpeed = -0.1;
+        if(-carSpeed*50 <= 100) {
+          carSpeed += -0.01;
+          policeSpeed += -0.01;
+          g.refresh((-carSpeed*50).toFixed(0));
+        }
     }
     if (currentlyPressedKeys[40]) {
         // DOWN
-        carSpeed = 0.1;
+        if(carSpeed*50 <= 20) {
+          carSpeed += 0.01;
+          policeSpeed += 0.01;
+          g.refresh((carSpeed*50).toFixed(0));
+        }
     }
     if (currentlyPressedKeys[37]) {
         // LEFT
         carRotation++;
+        policeRotation++;
     }
     if (currentlyPressedKeys[39]) {
         // RIGHT
         carRotation--;
+        policeRotation--;
     }
 }
 
@@ -685,5 +698,10 @@ function handleKeyDown(event) {
 
 function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
-    carSpeed=0;
+    if(event.keyCode == 38 || event.keyCode == 40) {
+      carSpeed=0;
+      policeSpeed = 0;
+      
+      g.refresh((-carSpeed*50).toFixed(0));
+    }
 }

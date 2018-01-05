@@ -31,3 +31,26 @@ td {
 	font-size:2em;
 	color: white;
 }
+
+#gauge {
+	position: absolute;
+	left: 17vw;
+	top:10px;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+#nitro {
+	position: absolute;
+	right: 17vw;
+	top:10px;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+#PreviewGaugeMeter_2 {
+	position: absolute !important;
+	left: 17vw;
+	top:10px;
+	border: none;
+}
