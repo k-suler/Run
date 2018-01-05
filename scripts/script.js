@@ -326,11 +326,7 @@ function handleTextureLoaded(texture) {
   texturesLoaded += 1;
 }
 
-//
-// handleLoadedTeapot
-//
-// Handle loaded teapot
-//
+
 function handleLoadedCar(car) {
   // Pass the normals into WebGL
   policeVertexNormalBuffer = gl.createBuffer();
@@ -533,7 +529,7 @@ function drawScene() {
   // and 100 units away from the camera.
   mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1500.0, pMatrix);
 
-  var specularHighlights = document.getElementById("specular").checked;
+  var specularHighlights = true;
   gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, specularHighlights);
 
   // Ligthing
@@ -545,7 +541,7 @@ function drawScene() {
 
   // set uniforms for lights as defined in the document
   if (lighting) {
-    gl.uniform3f(shaderProgram.ambientColorUniform,0.2, 0.2, 0.2);
+    gl.uniform3f(shaderProgram.ambientColorUniform,0.3, 0.3, 0.3);
     gl.uniform3f(shaderProgram.pointLightingLocationUniform, 0, -50, -20);
     gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
     gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
@@ -583,7 +579,7 @@ function drawScene() {
   // Activate shininess
   gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
-  // Set the vertex positions attribute for the teapot vertices.
+  // Set the vertex positions attribute for the car vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
   gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, policeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -609,6 +605,7 @@ function drawScene() {
   //
   // police draw Car
 
+  checkPoliceCrash()
   mvPushMatrix();
 
   // pozicija avta
@@ -624,7 +621,7 @@ function drawScene() {
   // Activate shininess
   gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
-  // Set the vertex positions attribute for the teapot vertices.
+  // Set the vertex positions attribute for the police car vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, policeVertexPositionBuffer);
   gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, policeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -667,7 +664,7 @@ function drawScene() {
   // Activate shininess
   gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
-  // Set the vertex positions attribute for the teapot vertices.
+  // Set the vertex positions attribute for the checkPoint vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexPositionBuffer);
   gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, checkVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -706,7 +703,7 @@ function drawScene() {
   // Activate shininess
   gl.uniform1f(shaderProgram.materialShininessUniform, 32);
 
-  // Set the vertex positions attribute for the teapot vertices.
+  // Set the vertex positions attribute for the map vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, mapVertexPositionBuffer);
   gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mapVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -779,10 +776,9 @@ function start() {
     loadCar();
     loadPCar();
     loadCheckPoint();
-    //debugger;
     
     document.onkeydown = handleKeyDown;
-	document.onkeyup = handleKeyUp;
+	  document.onkeyup = handleKeyUp;
    
     minutesLabel = document.getElementById("minutes");
     secondsLabel = document.getElementById("seconds");
@@ -804,8 +800,7 @@ function start() {
 }
 
 function checkCheckPoint(){
-
-  console.log('car x:'+ carPositionX + 'z:' + carPositionZ + ' Point ' + checkPointPos.x[checkStage] + ' ' + checkPointPos.z[checkStage])
+  //console.log('car x:'+ carPositionX + 'z:' + carPositionZ + ' Point ' + checkPointPos.x[checkStage] + ' ' + checkPointPos.z[checkStage])
   if (carPositionX-checkPointPos.x[checkStage] > -1.4 && carPositionX-checkPointPos.x[checkStage] < 1.4 &&
       carPositionZ-checkPointPos.z[checkStage] > -1.4 && carPositionZ-checkPointPos.z[checkStage] < 1.4){
     checkStage++;
@@ -817,6 +812,15 @@ function checkCheckPoint(){
     document.getElementsByClassName("end")[0].style.display = "block";
   }
 
+}
+
+function checkPoliceCrash(){
+  if (carPositionX-policePositionX > -2 && carPositionX-policePositionX < 2 &&
+      carPositionZ-policePositionZ > -2 && carPositionZ-policePositionZ < 2){
+      clearInterval(intervalID);
+      document.getElementsByClassName("end-text")[0].innerHTML = "Busted!<br><br>Press P to play again<br><br>Your time was " + minutesLabel.innerHTML + ":" + secondsLabel.innerHTML;
+      document.getElementsByClassName("end")[0].style.display = "block";
+  }
 }
 
 function handleKeys() {
@@ -837,9 +841,12 @@ function handleKeys() {
       if (carSpeed < 0)
         carSpeed += 0.05;
     }
+
+
     if (currentlyPressedKeys[38]) {
+       // console.log(carSpeed);
         // UP
-        if(30 < -carSpeed*50 && -carSpeed*50 <= 100) {
+        if(30 < -carSpeed*50 && -carSpeed*50 < 100) {
           carSpeed += -0.01;
           policeSpeed += -0.01;
           g.refresh((-carSpeed*50).toFixed(0));
@@ -852,14 +859,20 @@ function handleKeys() {
         }
 
         if (currentlyPressedKeys[78]) {
-          // NITRIČ
+          // NITRIO
           if(-carSpeed*50 <= 146 && nitro.config.value > 0) {
             carSpeed -= 0.05;
             nitro.refresh(nitro.config.value-1);
             policeSpeed += 0.01;
             g.refresh((-carSpeed*50).toFixed(0));
           }
-      }
+        } else {
+          if (-carSpeed*50 > 100){
+            carSpeed += 0.01;
+            policeSpeed += 0.01;
+            g.refresh((-carSpeed*50).toFixed(0));
+          }
+        }
       
       if(nitro.config.value < 100) {
         nitro.refresh(nitro.config.value+=0.05);
@@ -892,7 +905,7 @@ function handleKeyDown(event) {
 function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
     if(event.keyCode == 38 || event.keyCode == 40) {
-      carSpeed=0;
+      carSpeed = 0;
       policeSpeed = 0;
       
       g.refresh((-carSpeed*50).toFixed(0));
