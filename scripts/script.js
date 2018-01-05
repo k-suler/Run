@@ -20,6 +20,13 @@ var mapVertexNormalBuffer;
 var mapVertexTextureCoordBuffer;
 var mapVertexIndexBuffer;
 
+
+var checkVertexPositionBuffer;
+var checkVertexNormalBuffer;
+var checkVertexTextureCoordBuffer;
+var checkVertexIndexBuffer;
+
+
 // Model-view and projection matrix and model-view matrix stack
 var mvMatrixStack = [];
 var mvMatrix = mat4.create();
@@ -30,13 +37,14 @@ var strelaMcQuin;
 var tourDeQuin;
 
 // Variable that stores  loading state of textures.
-var numberOfTextures = 3;
+var numberOfTextures = 4;
 var texturesLoaded = 0;
 
 // Helper variables for rotation
 var carAngle = 180;
 var policeAngle = 180;
 var mapAngle = 180;
+var checkAngle = 180;
 
 var carRotation = 90;
 var carSpeed = 0;
@@ -47,6 +55,19 @@ var policeRotation = 90;
 var policeSpeed = 0;
 var policePositionX = 0;
 var policePositionZ = 7.5;
+
+
+var checkRotation= 180;
+var checkStage = 0;
+var checkPositionX = 0;
+var checkPositionZ = 0;
+
+
+var checkPointPos = {
+    x: [-61, -220,  -295, -268, -172, 47,  128,  155],
+    z: [-4,    50,   128,  289,  336, 310,  128,  -255],
+    a: [90,   100,   170,  220,   90, 110, 180, 180]
+}
 
 var currentlyPressedKeys = {};
 
@@ -260,6 +281,13 @@ function initTextures() {
     handleTextureLoaded(tourDeQuin)
   }
   tourDeQuin.image.src = "./assets/world1.png";
+ 
+  checkPoint = gl.createTexture();
+  checkPoint.image = new Image();
+  checkPoint.image.onload = function () {
+    handleTextureLoaded(checkPoint)
+  }
+  checkPoint.image.src = "./assets/check.png";
 
 }
 
@@ -350,6 +378,40 @@ function handleLoadedPCar(car) {
   document.getElementById("loadingtext").textContent = "";
 }
 
+//
+// Check Point
+function handleLoadedCheckPoint(point) {
+  // Pass the normals into WebGL
+  checkVertexNormalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexNormalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point.normals), gl.STATIC_DRAW);
+  checkVertexNormalBuffer.itemSize = 3;
+  checkVertexNormalBuffer.numItems = point.normals.length / 3;
+
+  // Pass the texture coordinates into WebGL
+  checkVertexTextureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexTextureCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point.uvs), gl.STATIC_DRAW);
+  checkVertexTextureCoordBuffer.itemSize = 2;
+  checkVertexTextureCoordBuffer.numItems = point.uvs.length / 2;
+
+  // Pass the vertex positions into WebGL
+  checkVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexPositionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point.vertices), gl.STATIC_DRAW);
+  checkVertexPositionBuffer.itemSize = 3;
+  checkVertexPositionBuffer.numItems = point.vertices.length / 3;
+
+  // Pass the indices into WebGL
+  checkVertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, checkVertexIndexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(point.faces), gl.STATIC_DRAW);
+  checkVertexIndexBuffer.itemSize = 1;
+  checkVertexIndexBuffer.numItems = point.faces.length;
+
+  document.getElementById("loadingtext").textContent = "";
+}
+
 function handleLoadedMap(map) {
   // Pass the normals into WebGL
   mapVertexNormalBuffer = gl.createBuffer();
@@ -406,13 +468,24 @@ function loadCar() {
 }
 
 
-//change blender file
 function loadPCar() {
   var request = new XMLHttpRequest();
   request.open("GET", "./assets/carP.json");
   request.onreadystatechange = function () {
     if (request.readyState == 4) {
       handleLoadedPCar(JSON.parse(request.responseText));
+    }
+  }
+  request.send();
+}
+
+
+function loadCheckPoint() {
+  var request = new XMLHttpRequest();
+  request.open("GET", "./assets/check.json");
+  request.onreadystatechange = function () {
+    if (request.readyState == 4) {
+      handleLoadedCheckPoint(JSON.parse(request.responseText));
     }
   }
   request.send();
@@ -552,6 +625,49 @@ function drawScene() {
   gl.drawElements(gl.TRIANGLES, policeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
   mvPopMatrix();
+ 
+ 
+  //
+  // Draw check point
+  // 
+
+  mvPushMatrix();
+
+  checkCheckPoint();
+  // pozicija točke
+  //mat4.scale(mvMatrix, [5, 5, 5])
+  mat4.translate(mvMatrix, [checkPointPos.x[checkStage], 0, checkPointPos.z[checkStage]]);
+  mat4.rotate(mvMatrix, degToRad(checkPointPos.a[checkStage]), [0, 1, 0]);
+  //mat4.rotate(mvMatrix, degToRad(checkAngle), [0, 1.2, 1.2]);
+  //mat4.rotate(mvMatrix, degToRad(checkRotation), [0, 0, 1]);
+
+  gl.bindTexture(gl.TEXTURE_2D, checkPoint);
+
+  gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+  // Activate shininess
+  gl.uniform1f(shaderProgram.materialShininessUniform, 32);
+
+  // Set the vertex positions attribute for the teapot vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, checkVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the texture coordinates attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexTextureCoordBuffer);
+  gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, checkVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the normals attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, checkVertexNormalBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, checkVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  // Set the index for the vertices.
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, checkVertexIndexBuffer);
+  setMatrixUniforms();
+
+  // Draw the Check Point
+  gl.drawElements(gl.TRIANGLES, checkVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+  mvPopMatrix();
 
   // draw map
 
@@ -640,6 +756,7 @@ function start() {
     loadMap();
     loadCar();
     loadPCar();
+    loadCheckPoint();
     //debugger;
     
     document.onkeydown = handleKeyDown;
@@ -654,6 +771,20 @@ function start() {
       }
     }, 15);
   }
+}
+
+function checkCheckPoint(){
+
+  console.log('car x:'+ carPositionX + 'z:' + carPositionZ + ' Point ' + checkPointPos.x[checkStage] + ' ' + checkPointPos.z[checkStage])
+  if (carPositionX-checkPointPos.x[checkStage] > -1.4 && carPositionX-checkPointPos.x[checkStage] < 1.4 &&
+      carPositionZ-checkPointPos.z[checkStage] > -1.4 && carPositionZ-checkPointPos.z[checkStage] < 1.4){
+    checkStage++;
+  }
+
+  if (checkStage == checkPointPos.x[checkStage]){
+    //END GAME
+  }
+
 }
 
 function handleKeys() {
