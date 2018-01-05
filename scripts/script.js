@@ -670,17 +670,31 @@ function handleKeys() {
           carRotation -= 3;
       }
       if (carSpeed < 0)
-        carSpeed += 0.1;
+        carSpeed += 0.05;
     }
-
-
     if (currentlyPressedKeys[38]) {
         // UP
-        if(-carSpeed*50 <= 100) {
+        if(30 < -carSpeed*50 && -carSpeed*50 <= 100) {
           carSpeed += -0.01;
           policeSpeed += -0.01;
           g.refresh((-carSpeed*50).toFixed(0));
         }
+        // UP
+        if(-carSpeed*50 <= 30) {
+          carSpeed += -0.03;
+          policeSpeed += -0.05;
+          g.refresh((-carSpeed*50).toFixed(0));
+        }
+
+        if (currentlyPressedKeys[78]) {
+          // NITRIČ
+          if(-carSpeed*50 <= 146 && nitro.config.value > 0) {
+            carSpeed -= 0.05;
+            nitro.refresh(nitro.config.value--);
+            policeSpeed += 0.01;
+            g.refresh((-carSpeed*50).toFixed(0));
+          }
+      }
     }
     if (currentlyPressedKeys[40]) {
         // DOWN
